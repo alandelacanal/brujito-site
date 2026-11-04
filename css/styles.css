@@ -13,6 +13,8 @@
   --amber-soft: #f0c27a;
   --brick: #b4432a;
   --olive: #6f7d3f;
+  --violet: #8b5cf0;
+  --violet-soft: #b79cf5;
   --cream: #efe3cf;
   --muted: #a99a84;
 
@@ -60,6 +62,77 @@ body {
   overflow-x: hidden;
 }
 
+/* =========================  AMBIENT MOVING BACKGROUND  =========================
+   Fixed layer behind everything: slow-drifting amber/violet/brick auroras plus a
+   faint twinkling starfield, echoing the logo's mystical night sky. Sits at z-0;
+   section backgrounds are made translucent so this shows through softly. */
+.ambient {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--bg);
+}
+.ambient-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.5;
+  will-change: transform;
+}
+.ambient-blob--amber {
+  width: 48vw; height: 48vw;
+  top: -8%; left: -6%;
+  background: radial-gradient(circle, rgba(232, 163, 61, 0.42), transparent 68%);
+  animation: drift-a 26s var(--ease-in-out) infinite alternate;
+}
+.ambient-blob--violet {
+  width: 54vw; height: 54vw;
+  bottom: -14%; right: -10%;
+  background: radial-gradient(circle, rgba(139, 92, 240, 0.4), transparent 68%);
+  animation: drift-b 32s var(--ease-in-out) infinite alternate;
+}
+.ambient-blob--brick {
+  width: 38vw; height: 38vw;
+  top: 38%; left: 46%;
+  background: radial-gradient(circle, rgba(180, 67, 42, 0.3), transparent 70%);
+  animation: drift-c 38s var(--ease-in-out) infinite alternate;
+}
+/* Twinkling starfield built from layered radial-gradient dots */
+.ambient-stars {
+  position: absolute;
+  inset: -20%;
+  background-image:
+    radial-gradient(1.4px 1.4px at 12% 22%, rgba(240, 194, 122, 0.9), transparent 60%),
+    radial-gradient(1.2px 1.2px at 78% 16%, rgba(183, 156, 245, 0.9), transparent 60%),
+    radial-gradient(1.6px 1.6px at 64% 68%, rgba(239, 227, 207, 0.85), transparent 60%),
+    radial-gradient(1.1px 1.1px at 30% 82%, rgba(240, 194, 122, 0.8), transparent 60%),
+    radial-gradient(1.3px 1.3px at 88% 54%, rgba(183, 156, 245, 0.8), transparent 60%),
+    radial-gradient(1px 1px at 46% 40%, rgba(239, 227, 207, 0.75), transparent 60%),
+    radial-gradient(1.2px 1.2px at 8% 60%, rgba(240, 194, 122, 0.7), transparent 60%),
+    radial-gradient(1.1px 1.1px at 54% 10%, rgba(239, 227, 207, 0.7), transparent 60%);
+  opacity: 0.5;
+  animation: twinkle 7s var(--ease-in-out) infinite;
+}
+
+@keyframes drift-a {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to   { transform: translate3d(8vw, 6vh, 0) scale(1.14); }
+}
+@keyframes drift-b {
+  from { transform: translate3d(0, 0, 0) scale(1.08); }
+  to   { transform: translate3d(-9vw, -7vh, 0) scale(1); }
+}
+@keyframes drift-c {
+  from { transform: translate3d(0, 0, 0) scale(0.9); }
+  to   { transform: translate3d(-6vw, 8vh, 0) scale(1.2); }
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 0.32; }
+  50%      { opacity: 0.6; }
+}
+
 /* Film-grain overlay */
 body::before {
   content: "";
@@ -91,6 +164,17 @@ h1, h2, h3 {
   letter-spacing: 0.04em;
   line-height: 0.98;
   margin: 0;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
 
 .skip-link {
@@ -147,7 +231,14 @@ h1, h2, h3 {
   font-size: 1.02rem;
 }
 .brand:hover { color: var(--amber-soft); }
-.brand-mark { color: var(--amber); display: inline-flex; }
+.brand-mark {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 0 1px rgba(232, 163, 61, 0.3), 0 0 14px rgba(139, 92, 240, 0.25);
+}
 .brand-text { white-space: nowrap; }
 
 .site-nav .nav-menu {
@@ -214,19 +305,50 @@ h1, h2, h3 {
     radial-gradient(120% 90% at 50% -10%, rgba(23, 18, 16, 0.9), transparent 60%),
     var(--bg);
 }
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: url("../assets/img/studio_1.png");
+  background-size: cover;
+  background-position: center;
+  /* Unify the photo with the warm amber palette and keep text legible */
+  filter: saturate(0.85) contrast(1.02) brightness(0.62) sepia(0.22);
+}
+.hero-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* Dark wash + warm vignette so the headline stays readable over the photo */
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgba(232, 163, 61, 0.14), transparent 55%),
+    linear-gradient(180deg, rgba(13, 11, 8, 0.72) 0%, rgba(13, 11, 8, 0.55) 40%, rgba(13, 11, 8, 0.9) 100%),
+    radial-gradient(120% 100% at 50% 50%, transparent 40%, rgba(13, 11, 8, 0.55) 100%);
+}
 .hero-glow {
   position: absolute;
   z-index: 0;
-  top: 18%;
+  top: 14%;
   left: 50%;
   transform: translateX(-50%);
   width: min(900px, 120vw);
   height: min(900px, 120vw);
   pointer-events: none;
-  background: radial-gradient(circle, rgba(232, 163, 61, 0.22), rgba(232, 163, 61, 0.06) 42%, transparent 66%);
+  background:
+    radial-gradient(circle at 42% 42%, rgba(139, 92, 240, 0.14), transparent 55%),
+    radial-gradient(circle, rgba(232, 163, 61, 0.16), rgba(232, 163, 61, 0.05) 42%, transparent 66%);
   filter: blur(10px);
+  mix-blend-mode: screen;
 }
-.hero-wrap { position: relative; z-index: 2; }
+.hero-wrap {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
 .hero-eyebrow {
   font-family: var(--font-display);
@@ -252,18 +374,23 @@ h1, h2, h3 {
   color: var(--cream);
 }
 .hero-tag {
-  margin: 0;
-  max-width: 44ch;
+  margin: 0.4rem auto 0;
+  max-width: 48ch;
   color: var(--muted);
 }
 .hero-tag .accent { color: var(--amber-soft); }
 
-.hero-seal {
-  margin-top: 2.2rem;
-  color: var(--amber);
-  opacity: 0.9;
+.hero-logo {
+  width: clamp(240px, 42vw, 440px);
+  height: auto;
+  margin: 0 auto 1.6rem;
+  border-radius: 14px;
+  /* The logo_1 art is dorado-on-black; blend its black border into the page
+     and lift it with a warm+violet glow */
+  mix-blend-mode: screen;
+  filter: drop-shadow(0 0 40px rgba(232, 163, 61, 0.28))
+          drop-shadow(0 0 70px rgba(139, 92, 240, 0.22));
 }
-.seal-text { fill: var(--amber); font-family: var(--font-display); letter-spacing: 0.2em; }
 
 .scroll-cue {
   position: absolute;
@@ -302,15 +429,16 @@ h1, h2, h3 {
   z-index: 2;
   padding-block: clamp(4.5rem, 10vw, 11rem);
 }
-.section-sobre { background: var(--bg); }
-.section-produccion { background: var(--bg-2); }
-.section-discografia { background: var(--bg); }
-.section-musica { background: var(--bg-2); }
-.section-sesiones { background: var(--bg); }
+.section-sobre { background: rgba(13, 11, 8, 0.82); }
+.section-produccion { background: rgba(23, 18, 16, 0.8); }
+.section-discografia { background: rgba(13, 11, 8, 0.82); }
+.section-musica { background: rgba(23, 18, 16, 0.8); }
+.section-sesiones { background: rgba(13, 11, 8, 0.82); }
 .section-contacto {
   background:
-    radial-gradient(90% 120% at 50% 120%, rgba(232, 163, 61, 0.1), transparent 60%),
-    var(--bg-2);
+    radial-gradient(70% 100% at 18% 0%, rgba(139, 92, 240, 0.12), transparent 55%),
+    radial-gradient(90% 120% at 50% 120%, rgba(232, 163, 61, 0.12), transparent 60%),
+    rgba(23, 18, 16, 0.78);
 }
 
 .eyebrow {
@@ -384,10 +512,16 @@ h1, h2, h3 {
               border-color var(--t-hover) var(--ease-out),
               box-shadow var(--t-hover) var(--ease-out);
 }
-.section-produccion .card,
-.section-musica .card { background: var(--bg); }
+.card:hover,
+.card:focus-within {
+  transform: translateY(-4px);
+  border-color: rgba(139, 92, 240, 0.4);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.5),
+              0 0 0 1px rgba(232, 163, 61, 0.12);
+}
+.card { background: rgba(13, 11, 8, 0.66); backdrop-filter: blur(6px); }
 .section-discografia .card,
-.section-sesiones .card { background: var(--bg-2); }
+.section-sesiones .card { background: rgba(23, 18, 16, 0.66); }
 
 .card h3 {
   font-size: 1.25rem;
@@ -426,7 +560,7 @@ h1, h2, h3 {
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: 0.22em;
-  color: var(--olive);
+  color: var(--violet-soft);
   font-size: 0.76rem;
   margin: 0 0 0.5rem;
 }
@@ -482,13 +616,19 @@ h1, h2, h3 {
 .site-footer {
   position: relative;
   z-index: 2;
-  background: var(--bg);
+  background: rgba(13, 11, 8, 0.82);
   padding-block: clamp(3rem, 6vw, 5rem);
   border-top: 1px solid rgba(232, 163, 61, 0.1);
   text-align: center;
 }
 .footer-wrap { display: flex; flex-direction: column; align-items: center; gap: 0.7rem; }
-.footer-seal { color: var(--amber); opacity: 0.85; }
+.footer-seal img {
+  width: clamp(96px, 16vw, 140px);
+  height: auto;
+  border-radius: 12px;
+  mix-blend-mode: screen;
+  filter: drop-shadow(0 0 22px rgba(139, 92, 240, 0.25));
+}
 .footer-label {
   font-family: var(--font-display);
   text-transform: uppercase;
@@ -585,4 +725,6 @@ body.nav-open { overflow: hidden; }
   .js [data-reveal],
   .js [data-load] { opacity: 1 !important; transform: none !important; }
   .scroll-cue-chevron { animation: none; }
+  .ambient-blob,
+  .ambient-stars { animation: none !important; }
 }
